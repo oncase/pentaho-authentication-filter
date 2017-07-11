@@ -1,0 +1,10 @@
+# DIST
+target/
+
+# IDE
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store

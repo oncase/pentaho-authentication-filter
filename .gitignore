@@ -1,10 +1,13 @@
 # DIST
 target/
+bin/
 
 # IDE
 .classpath
 .project
 .settings/
+.idea/
 
 # OS
 .DS_Store
+

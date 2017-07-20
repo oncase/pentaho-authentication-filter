@@ -1,20 +1,25 @@
 package com.oncase.security.filter.authentication;
 
+
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.Authentication;
+import org.springframework.security.GrantedAuthority;
+import org.springframework.security.context.SecurityContext;
+//import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.context.EnvironmentAware;
 
 public class AuthenticationIPFilter extends GenericFilterBean {
 
@@ -59,12 +64,12 @@ public class AuthenticationIPFilter extends GenericFilterBean {
 	}
 	
 	private boolean hasAuthority (
-			Collection<? extends GrantedAuthority> authorities, 
+			GrantedAuthority[] grantedAuthorities, 
 			String authority ){
 		
-		if (authorities == null || authority == null) return false;
-		
-		Iterator<? extends GrantedAuthority> it = authorities.iterator();
+		if (grantedAuthorities == null || authority == null) return false;
+		List<GrantedAuthority> grantedAuthoritiesList = Arrays.asList(grantedAuthorities);
+		Iterator<? extends GrantedAuthority> it = grantedAuthoritiesList.iterator();
 		
 		while(it.hasNext()){
 			if (authority.equals(it.next().toString())) return true;

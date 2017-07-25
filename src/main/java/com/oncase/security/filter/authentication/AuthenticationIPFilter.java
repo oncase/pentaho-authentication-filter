@@ -1,114 +1,140 @@
 package com.oncase.security.filter.authentication;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.swing.JOptionPane;
 
 import org.springframework.security.Authentication;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.context.SecurityContext;
 import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
-import org.springframework.context.EnvironmentAware;
 
 public class AuthenticationIPFilter extends GenericFilterBean {
 
-	private HashMap<String, String[]> rules;
-	
+	private HashMap<String, ArrayList<String>> rules;
+	private String adminRole;
+	private boolean debug;
+
 	public void doFilter( ServletRequest request,  ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
 
 		SecurityContext securityContext = SecurityContextHolder.getContext();
 		Authentication existingAuth = securityContext.getAuthentication();
-	
+		
+		System.out.println("1. Entering Filter");
+		
+		// //TODO: inspect existingAuth to determine a better entry point to this if
+		
 		// If there is an authentication
 		if(existingAuth != null){
-			
+			System.out.println("2. No AUTH");
 			// Client IP
 			String remoteAddr = request.getRemoteAddr();
 
 			// Does the current user belong to a certain group?
-			boolean containsAdmin = hasAuthority(existingAuth.getAuthorities(), remoteAddr);
-			
-			// Debug logs
-			log("Contains Admin?", containsAdmin + "");
+			boolean canAccess = hasAuthority(existingAuth.getAuthorities(), remoteAddr);
 		
 			// If rules attended, then logout
-			if( containsAdmin ) {
-			} else {
+			if( !canAccess ) {
+				System.out.println("3. Can't Access");
 				SecurityContextHolder.clearContext();
+			}else{
+				System.out.println("3. CAN ACCESS");
 			}
 		}
+		
 		// Continues the filter chain
 		chain.doFilter(request, response);
 	}
 	
 	private boolean hasAuthority (GrantedAuthority[] grantedAuthorities, String remoteAddr){
 		
-		rules = new HashMap<String, String[]>();
-
-		// configure sua lista de acesso
-		String key01 = "Seguradora";
-		String key02 = "Administrator";
-		String[] value01 = {"192.123.121.1", "192.168.0.1", "127.0.0.2"};
-		String[] value02 = {"192.168.0.2", "127.0.0.2"};
-		
-		rules.put(key01, value01);
-		rules.put(key02, value02);
-		
-		int index = 0;
-		int sizeList = 0;
-		boolean cotain = false;
-		boolean result = false;
-		String[] listIp = {""};
-		
 		List<GrantedAuthority> grantedAuthoritiesList = Arrays.asList(grantedAuthorities);
+		
 		Iterator<? extends GrantedAuthority> it = grantedAuthoritiesList.iterator();
 		
-		for (String key : rules.keySet()) {
-			if(key.equals(it.next().toString())) {
-				cotain = true;
-				listIp = rules.get(key);
+		ArrayList<String> ips = new ArrayList<String>();
+
+		while(it.hasNext()){
+			
+			String role = it.next().toString();
+			
+			// Short circuit case admin
+			if( role.equals(adminRole) ){
+				if(debug) log("Short Circuit 01: ADMIN", role);
+				return true;
+			}
+
+			// Build list with ips that matches roles
+			ArrayList<String> currentIPs = rules.get(role);
+
+			if(currentIPs != null){
+				ips.addAll(currentIPs);
+			}
+
+		}
+		
+		// Short circuit case no rules
+		if( ips.size() == 0 ){
+			if(debug) log("Short Circuit 02: no rules", ips.size()+"");
+			return true;
+		}
+		
+		// Checks IPs
+		Iterator<String> itIPs = ips.iterator();
+		while(itIPs.hasNext()){
+			String ip = itIPs.next();
+			if(ip.equals(remoteAddr)){
+				if(debug) log("IP Matches", remoteAddr + " - " + ip);
+				return true;
 			}
 		}
-		if (cotain == true ) {
-			for (int i = 0; i < listIp.length; i++ ) {
-				if(i <= 0) {
-				int temp = listIp.length - 1;
-				sizeList = temp;
-		    }	
-				if(listIp[i].equals(remoteAddr)) {
-					System.out.println("tem ip");
-					result = true;
-					System.out.println(remoteAddr);
-					break;
-				} else if(sizeList == i){
-					System.out.println("nao tem ip");
-					result = false;
-					break;
-				}
-			}
-			System.out.println(cotain + " aqui ");
-		} else {			
-			result = true;
+
+		if(debug) {
+			log("Returning FALSE - ROLES:", Arrays.toString(grantedAuthorities));
+			log("Returning FALSE - RULES: ", rules.toString());
+			log("Returning FALSE - IP: ", remoteAddr);	
 		}
-		return result;
+		
+		return false;
 }
 	private void log(String msg, String value){
 		System.out.println("\n\n " + msg + " ----------------------------");
 		System.out.println(value);
 		System.out.println(" -------------------------------------------");
+	}
+
+	public HashMap<String, ArrayList<String>> getRules() {
+		return rules;
+	}
+
+	public void setRules(HashMap<String, ArrayList<String>> rules) {
+		this.rules = rules;
+	}
+
+	public String getAdminRole() {
+		return adminRole;
+	}
+
+	public void setAdminRole(String adminRole) {
+		this.adminRole = adminRole;
+	}
+
+	public boolean isDebug() {
+		return debug;
+	}
+
+	public void setDebug(boolean debug) {
+		this.debug = debug;
 	}
 }
 

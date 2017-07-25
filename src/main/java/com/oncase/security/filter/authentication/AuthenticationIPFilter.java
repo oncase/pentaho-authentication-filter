@@ -47,26 +47,7 @@ public class AuthenticationIPFilter extends GenericFilterBean {
 			// If rules attended, then logout
 			if( containsAdmin ) {
 			} else {
-				  response.setContentType("text/html");
-	              PrintWriter out = response.getWriter();
-	              out.println("<html>");
-	              out.println("<meta charset=\"UTF-8\">");
-	              out.println("<head>");
-	              out.println("<title>Acesso Negado</title>");
-	              out.println("<title>Acesso Negado</title>");
-	              out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"/pentaho/content/common-ui/resources/themes/crystal/globalCrystal.css\" />");
-	              out.println("</head>");
-	              out.println("<body class=\"pentaho-page-background\" >");
-	              out.println("<div class=\"warning\" style=\"margin: 10px auto;\">");
-	              out.println("<div style=\"padding:0px 0px 0px 50px\">");
-	              out.println("<div class=\"warning-header \">Desculpa. Realmente tentamos.</div>");
-	              out.println("<div>Seu IP nao tem permissao para acessar!</div>");
-	              out.println("<div> Contacte seu administrador .</div>");
-	              out.println("</div>");
-	              out.println("</div>");
-	              out.println("</body>");
-	              out.println("</html>");
-//				SecurityContextHolder.clearContext();
+				SecurityContextHolder.clearContext();
 			}
 		}
 		// Continues the filter chain
@@ -123,8 +104,7 @@ public class AuthenticationIPFilter extends GenericFilterBean {
 			result = true;
 		}
 		return result;
-	}
-
+}
 	private void log(String msg, String value){
 		System.out.println("\n\n " + msg + " ----------------------------");
 		System.out.println(value);

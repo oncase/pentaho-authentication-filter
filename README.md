@@ -25,6 +25,35 @@ cp ./target/authentication-filter-TRUNK-SNAPSHOT.jar /<INSTALL_DIR>/pentaho-serv
 </bean>
 ```
 
+
+* To configure the list of roles, insert inside the bean (** authenticationIPFilter **)
+
+```xml
+  <property name="debug" value="true" />
+  <property name="adminRole" value="Administrator" />
+  <property name="rules">
+   <map>
+      <entry> 
+        <key>
+          <value>Power User</value> 
+        </key>
+        <list>                  
+          <value>0:0:0:0:0:0:0:1</value>
+          <value>127.0.0.1</value>
+        </list>
+      </entry>
+      <entry> 
+        <key>
+          <value>Business Analyst</value> 
+        </key>
+        <list>                  
+          <value>NOTHING</value>
+        </list>
+      </entry>
+    </map> 
+  </property>
+```
+
 * Insert the new bean ID into the chain (**authenticationIPFilter**)
 
 ```xml

@@ -29,7 +29,6 @@ public class AuthenticationIPFilter extends GenericFilterBean {
 
 		SecurityContext securityContext = SecurityContextHolder.getContext();
 		Authentication existingAuth = securityContext.getAuthentication();
-		
 		System.out.println("1. Entering Filter");
 		
 		// //TODO: inspect existingAuth to determine a better entry point to this if
@@ -82,19 +81,16 @@ public class AuthenticationIPFilter extends GenericFilterBean {
 			}
 
 		}
-		
-		// Short circuit case no rules
-		if( ips.size() == 0 ){
-			if(debug) log("Short Circuit 02: no rules", ips.size()+"");
-			return true;
-		}
-		
+				
 		// Checks IPs
 		Iterator<String> itIPs = ips.iterator();
 		while(itIPs.hasNext()){
 			String ip = itIPs.next();
 			if(ip.equals(remoteAddr)){
 				if(debug) log("IP Matches", remoteAddr + " - " + ip);
+				return true;
+			} else if (ip.equals("NOTHING")){
+				if(debug) log("Short Circuit 02: no rules", ips + " ");
 				return true;
 			}
 		}

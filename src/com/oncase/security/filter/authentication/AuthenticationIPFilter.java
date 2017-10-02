@@ -81,7 +81,13 @@ public class AuthenticationIPFilter extends GenericFilterBean {
 			}
 
 		}
-				
+		
+		// Short circuit case no rules
+		if( ips.size() == 0 ){
+			if(debug) log("Short Circuit 02: no rules", ips.size()+"");
+			return true;
+		}
+		
 		// Checks IPs
 		Iterator<String> itIPs = ips.iterator();
 		while(itIPs.hasNext()){
@@ -90,7 +96,7 @@ public class AuthenticationIPFilter extends GenericFilterBean {
 				if(debug) log("IP Matches", remoteAddr + " - " + ip);
 				return true;
 			} else if (ip.equals("NOTHING")){
-				if(debug) log("Short Circuit 02: no rules", ips + " ");
+				if(debug) log("Short Circuit 03: NOTHING", ips + " ");
 				return true;
 			}
 		}
